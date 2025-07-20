@@ -21,6 +21,7 @@ export default function PortfolioBuilder({ portfolioId }: PortfolioBuilderProps)
     const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null)
     const [isPreviewMode, setIsPreviewMode] = useState(false)
     const [isSaving, setIsSaving] = useState(false)
+    const [viewMode, setViewMode] = useState<'sections' | 'freeform'>('sections')
 
     useEffect(() => {
         if (portfolio) {
@@ -54,7 +55,7 @@ export default function PortfolioBuilder({ portfolioId }: PortfolioBuilderProps)
         const sectionType = active.data.current?.type
 
         // Adding new section from sidebar
-        if (sectionType && over.id === 'canvas') {
+        if (sectionType && (over.id === 'canvas' || over.id === 'freeform-canvas')) {
             const newSection: PortfolioSection = {
                 id: `section-${Date.now()}`,
                 type: sectionType,
@@ -88,47 +89,166 @@ export default function PortfolioBuilder({ portfolioId }: PortfolioBuilderProps)
     }
 
     const getDefaultSectionData = (type: string) => {
-        const defaultData = {
+        const defaultBackgrounds = {
             hero: {
-                title: '',
-                subtitle: '',
-                description: '',
-                image: null
+                type: 'gradient',
+                gradient: {
+                    from: '#2563eb',
+                    to: '#7c3aed',
+                    direction: 'to-r'
+                }
             },
             about: {
-                title: 'About Me',
-                content: '',
-                image: null
+                type: 'solid',
+                color: '#ffffff'
             },
             projects: {
-                title: 'My Projects',
-                projects: []
+                type: 'gradient',
+                gradient: {
+                    from: '#f8fafc',
+                    to: '#e2e8f0',
+                    direction: 'to-br'
+                }
             },
             skills: {
-                title: 'Skills & Expertise',
-                skills: []
+                type: 'solid',
+                color: '#f9fafb'
             },
             contact: {
-                title: 'Get In Touch',
-                email: '',
-                phone: '',
-                social: {}
+                type: 'gradient',
+                gradient: {
+                    from: '#1f2937',
+                    to: '#111827',
+                    direction: 'to-r'
+                }
+            },
+            experience: {
+                type: 'solid',
+                color: '#ffffff'
             },
             navigation: {
-                title: 'Navigation',
-                items: [
-                    { name: 'Home', href: '#home' },
-                    { name: 'About', href: '#about' },
-                    { name: 'Projects', href: '#projects' },
-                    { name: 'Contact', href: '#contact' }
-                ]
+                type: 'solid',
+                color: '#ffffff'
             }
         }
 
-        return defaultData[type] || {}
+        const defaultTextStyles = {
+            title: {
+                textAlign: 'center' as const,
+                fontSize: '3xl' as const,
+                fontWeight: 'bold' as const,
+                color: type === 'hero' || type === 'contact' ? '#ffffff' : '#111827'
+            },
+            subtitle: {
+                textAlign: 'center' as const,
+                fontSize: 'xl' as const,
+                fontWeight: 'medium' as const,
+                color: type === 'hero' || type === 'contact' ? '#f3f4f6' : '#6b7280'
+            },
+            content: {
+                textAlign: 'left' as const,
+                fontSize: 'base' as const,
+                fontWeight: 'normal' as const,
+                color: type === 'hero' || type === 'contact' ? '#f3f4f6' : '#374151'
+            }
+        }
+
+        switch (type) {
+            case 'hero':
+                return {
+                    title: 'Your Name',
+                    subtitle: 'Your Professional Title',
+                    description: 'Brief description about yourself and what you do.',
+                    background: defaultBackgrounds.hero,
+                    titleStyles: { ...defaultTextStyles.title, fontSize: '5xl' as const },
+                    subtitleStyles: { ...defaultTextStyles.subtitle, fontSize: '2xl' as const },
+                    descriptionStyles: { ...defaultTextStyles.content, textAlign: 'center' as const, fontSize: 'lg' as const },
+                    image: null
+                }
+            case 'about':
+                return {
+                    title: 'About Me',
+                    content: 'Tell your story and what makes you unique. Share your background, experiences, and what drives your passion in your field.',
+                    background: defaultBackgrounds.about,
+                    titleStyles: { ...defaultTextStyles.title, textAlign: 'left' as const },
+                    contentStyles: defaultTextStyles.content,
+                    image: null
+                }
+            case 'projects':
+                return {
+                    title: 'My Projects',
+                    projects: [
+                        {
+                            id: `project-${Date.now()}`,
+                            title: 'Sample Project',
+                            description: 'This is a sample project. Click to edit and add your own projects.',
+                            technologies: ['React', 'Next.js', 'TypeScript'],
+                            titleStyles: { ...defaultTextStyles.title, fontSize: 'lg' as const, textAlign: 'left' as const, color: '#111827' },
+                            descriptionStyles: { ...defaultTextStyles.content, fontSize: 'sm' as const, color: '#6b7280' }
+                        }
+                    ],
+                    background: defaultBackgrounds.projects,
+                    titleStyles: { ...defaultTextStyles.title, textAlign: 'center' as const }
+                }
+            case 'skills':
+                return {
+                    title: 'Skills & Expertise',
+                    skills: [
+                        { id: `skill-${Date.now()}`, name: 'JavaScript', level: 90, category: 'Programming' },
+                        { id: `skill-${Date.now() + 1}`, name: 'React', level: 85, category: 'Frontend' },
+                        { id: `skill-${Date.now() + 2}`, name: 'Node.js', level: 80, category: 'Backend' }
+                    ],
+                    background: defaultBackgrounds.skills,
+                    titleStyles: { ...defaultTextStyles.title, textAlign: 'center' as const }
+                }
+            case 'experience':
+                return {
+                    title: 'Work Experience',
+                    experiences: [
+                        {
+                            id: `exp-${Date.now()}`,
+                            position: 'Software Developer',
+                            company: 'Tech Company',
+                            startDate: '2022',
+                            endDate: 'Present',
+                            description: 'Describe your role and achievements in this position.',
+                            positionStyles: { fontSize: 'xl' as const, fontWeight: 'semibold' as const, textAlign: 'left' as const, color: '#111827' },
+                            companyStyles: { fontSize: 'base' as const, fontWeight: 'medium' as const, textAlign: 'left' as const, color: '#2563eb' },
+                            descriptionStyles: { fontSize: 'base' as const, fontWeight: 'normal' as const, textAlign: 'left' as const, color: '#6b7280' }
+                        }
+                    ],
+                    background: defaultBackgrounds.experience,
+                    titleStyles: { ...defaultTextStyles.title, textAlign: 'center' as const }
+                }
+            case 'contact':
+                return {
+                    title: 'Get In Touch',
+                    email: 'your.email@example.com',
+                    phone: '+1 (555) 123-4567',
+                    location: 'Your Location',
+                    background: defaultBackgrounds.contact,
+                    titleStyles: { ...defaultTextStyles.title, color: '#ffffff' },
+                    emailStyles: { ...defaultTextStyles.content, color: '#f3f4f6', fontSize: 'lg' as const, fontWeight: 'medium' as const },
+                    phoneStyles: { ...defaultTextStyles.content, color: '#f3f4f6', fontSize: 'lg' as const, fontWeight: 'medium' as const },
+                    locationStyles: { ...defaultTextStyles.content, color: '#f3f4f6', fontSize: 'lg' as const, fontWeight: 'medium' as const },
+                    social: {}
+                }
+            case 'navigation':
+                return {
+                    title: 'Navigation',
+                    background: defaultBackgrounds.navigation,
+                    items: []
+                }
+            default:
+                return {
+                    background: { type: 'solid', color: '#ffffff' }
+                }
+        }
     }
 
 
+
+    // This is the missing function that was causing the error
     const updateSection = async (sectionId: string, data: any) => {
         const newSections = sections.map(section =>
             section.id === sectionId
@@ -136,6 +256,13 @@ export default function PortfolioBuilder({ portfolioId }: PortfolioBuilderProps)
                 : section
         )
         setSections(newSections)
+        await savePortfolio(newSections)
+    }
+
+    const deleteSection = async (sectionId: string) => {
+        const newSections = sections.filter(section => section.id !== sectionId)
+        setSections(newSections)
+        setSelectedSectionId(null)
         await savePortfolio(newSections)
     }
 
@@ -155,13 +282,6 @@ export default function PortfolioBuilder({ portfolioId }: PortfolioBuilderProps)
         await savePortfolio(newSections)
     }
 
-    const deleteSection = async (sectionId: string) => {
-        const newSections = sections.filter(section => section.id !== sectionId)
-        setSections(newSections)
-        setSelectedSectionId(null)
-        await savePortfolio(newSections)
-    }
-
     const savePortfolio = async (updatedSections: PortfolioSection[]) => {
         if (!portfolio) return
 
@@ -174,6 +294,23 @@ export default function PortfolioBuilder({ portfolioId }: PortfolioBuilderProps)
             })
         } catch (error) {
             console.error('Error saving portfolio:', error)
+        } finally {
+            setIsSaving(false)
+        }
+    }
+
+    const handleThemeChange = async (theme: any) => {
+        if (!portfolio) return
+
+        try {
+            setIsSaving(true)
+            await updatePortfolio({
+                ...portfolio,
+                theme,
+                updatedAt: new Date()
+            })
+        } catch (error) {
+            console.error('Error updating theme:', error)
         } finally {
             setIsSaving(false)
         }
@@ -201,6 +338,9 @@ export default function PortfolioBuilder({ portfolioId }: PortfolioBuilderProps)
                 isPreviewMode={isPreviewMode}
                 setIsPreviewMode={setIsPreviewMode}
                 isSaving={isSaving}
+                viewMode={viewMode}
+                setViewMode={setViewMode}
+                onThemeChange={handleThemeChange}
             />
 
             <div className="flex-1 flex overflow-hidden">
@@ -229,8 +369,8 @@ export default function PortfolioBuilder({ portfolioId }: PortfolioBuilderProps)
                             setSelectedSectionId={setSelectedSectionId}
                             isPreviewMode={isPreviewMode}
                             onUpdateSection={updateSection}
-                            onDeleteSection={deleteSection} // This should already exist
-                            onDuplicateSection={duplicateSection} // Add this new function
+                            onDeleteSection={deleteSection}
+                            onDuplicateSection={duplicateSection}
                         />
                     </SortableContext>
 

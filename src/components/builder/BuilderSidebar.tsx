@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useDraggable } from '@dnd-kit/core'
 import { PortfolioSection } from '@/types/portfolio'
-import { Menu, User, Info, Briefcase, Lightbulb, Mail, GraduationCap, Building, Layers, Settings } from 'lucide-react'
+import { Navigation, User, Info, Briefcase, Lightbulb, Mail, GraduationCap, Building, Layers, Settings, MessageSquare, Images, Palette } from 'lucide-react'
 
 interface BuilderSidebarProps {
     selectedSectionId: string | null
@@ -18,7 +18,7 @@ const sectionTypes = [
         type: 'navigation',
         name: 'Navigation Bar',
         description: 'Top navigation menu for your portfolio',
-        icon: Menu
+        icon: Navigation
     },
     {
         type: 'hero',
@@ -56,6 +56,18 @@ const sectionTypes = [
         description: 'Educational background and certifications',
         icon: GraduationCap
     },
+    {
+    type: 'testimonials',
+    name: 'Testimonials',
+    description: 'Client and colleague recommendations',
+    icon: MessageSquare // Updated icon
+  },
+  {
+    type: 'gallery',
+    name: 'Gallery',
+    description: 'Image gallery or portfolio showcase',
+    icon: Images // Updated icon
+  },
     {
         type: 'contact',
         name: 'Contact',

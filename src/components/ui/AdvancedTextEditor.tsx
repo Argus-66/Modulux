@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
-import { Edit3, Check, X, AlignLeft, AlignCenter, AlignRight, Type, Palette } from 'lucide-react'
+import { useState, useRef, useEffect, useMemo } from 'react'
+import { Edit3, Check, X, AlignLeft, AlignCenter, AlignRight, Type } from 'lucide-react'
 
 interface AdvancedTextEditorProps {
   value: string
@@ -31,21 +31,47 @@ export default function AdvancedTextEditor({
 }: AdvancedTextEditorProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [editValue, setEditValue] = useState(value)
-  const [currentStyles, setCurrentStyles] = useState<TextStyles>({
-    textAlign: 'left',
-    fontSize: 'base',
-    fontWeight: 'normal',
-    color: '#000000',
-    ...styles
-  })
   const [showStylePanel, setShowStylePanel] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null)
+  
+  const stableStyles = useMemo(() => ({
+    textAlign: 'left' as const,
+    fontSize: 'base' as const,
+    fontWeight: 'normal' as const,
+    color: '#000000',
+    ...styles
+  }), [
+    styles?.textAlign,
+    styles?.fontSize,
+    styles?.fontWeight,
+    styles?.color
+  ])
+
+  const [currentStyles, setCurrentStyles] = useState<TextStyles>(stableStyles)
+
+  const prevValueRef = useRef(value)
+  const prevStylesRef = useRef(stableStyles)
 
   useEffect(() => {
-    setEditValue(value || '')
-    setCurrentStyles(prev => ({ ...prev, ...styles }))
-  }, [value, styles])
+    if (prevValueRef.current !== value) {
+      setEditValue(value || '')
+      prevValueRef.current = value
+    }
+  }, [value])
+
+  useEffect(() => {
+    const stylesChanged = 
+      prevStylesRef.current.textAlign !== stableStyles.textAlign ||
+      prevStylesRef.current.fontSize !== stableStyles.fontSize ||
+      prevStylesRef.current.fontWeight !== stableStyles.fontWeight ||
+      prevStylesRef.current.color !== stableStyles.color
+
+    if (stylesChanged) {
+      setCurrentStyles(stableStyles)
+      prevStylesRef.current = stableStyles
+    }
+  }, [stableStyles])
 
   useEffect(() => {
     if (isEditing && inputRef.current) {
@@ -57,7 +83,11 @@ export default function AdvancedTextEditor({
   }, [isEditing, multiline])
 
   const handleSave = async () => {
-    if (editValue === value && JSON.stringify(currentStyles) === JSON.stringify(styles)) {
+    if (editValue === value && 
+        currentStyles.textAlign === stableStyles.textAlign &&
+        currentStyles.fontSize === stableStyles.fontSize &&
+        currentStyles.fontWeight === stableStyles.fontWeight &&
+        currentStyles.color === stableStyles.color) {
       setIsEditing(false)
       setShowStylePanel(false)
       return
@@ -71,7 +101,7 @@ export default function AdvancedTextEditor({
     } catch (error) {
       console.error('Failed to save:', error)
       setEditValue(value)
-      setCurrentStyles(prev => ({ ...prev, ...styles }))
+      setCurrentStyles(stableStyles)
     } finally {
       setIsSaving(false)
     }
@@ -79,9 +109,23 @@ export default function AdvancedTextEditor({
 
   const handleCancel = () => {
     setEditValue(value)
-    setCurrentStyles(prev => ({ ...prev, ...styles }))
+    setCurrentStyles(stableStyles)
     setIsEditing(false)
     setShowStylePanel(false)
+  }
+
+  // FIX: Handle keyboard events - Enter saves, Escape cancels
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !multiline) {
+      e.preventDefault()
+      handleSave()
+    } else if (e.key === 'Enter' && multiline && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault()
+      handleSave()
+    } else if (e.key === 'Escape') {
+      e.preventDefault()
+      handleCancel()
+    }
   }
 
   const getStyleClasses = () => {
@@ -125,10 +169,10 @@ export default function AdvancedTextEditor({
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Alignment</label>
                 <div className="flex border border-gray-300 rounded">
-                  {['left', 'center', 'right'].map((align) => (
+                  {(['left', 'center', 'right'] as const).map((align) => (
                     <button
                       key={align}
-                      onClick={() => setCurrentStyles(prev => ({ ...prev, textAlign: align as any }))}
+                      onClick={() => setCurrentStyles(prev => ({ ...prev, textAlign: align }))}
                       className={`flex-1 p-1 ${currentStyles.textAlign === align ? 'bg-blue-500 text-white' : 'hover:bg-gray-100'}`}
                     >
                       {align === 'left' && <AlignLeft className="w-4 h-4" />}
@@ -192,12 +236,13 @@ export default function AdvancedTextEditor({
           </div>
         )}
 
-        {/* Input Field */}
+        {/* Input Field with onKeyDown */}
         {multiline ? (
           <textarea
             ref={inputRef as React.RefObject<HTMLTextAreaElement>}
             value={editValue}
             onChange={(e) => setEditValue(e.target.value)}
+            onKeyDown={handleKeyDown}
             placeholder={placeholder}
             maxLength={maxLength}
             rows={4}
@@ -211,6 +256,7 @@ export default function AdvancedTextEditor({
             type="text"
             value={editValue}
             onChange={(e) => setEditValue(e.target.value)}
+            onKeyDown={handleKeyDown}
             placeholder={placeholder}
             maxLength={maxLength}
             className={`w-full p-3 border-2 border-blue-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${getStyleClasses()}`}
@@ -224,6 +270,9 @@ export default function AdvancedTextEditor({
           <div className="flex items-center space-x-3 text-gray-600">
             <span>{editValue.length}/{maxLength}</span>
             {isSaving && <span className="text-blue-600">Saving...</span>}
+            <span className="text-green-600">
+              {multiline ? 'Ctrl+Enter to save' : 'Enter to save'}
+            </span>
           </div>
           
           <div className="flex items-center space-x-1">
@@ -246,7 +295,7 @@ export default function AdvancedTextEditor({
               onClick={handleCancel}
               disabled={isSaving}
               className="p-1 text-gray-500 hover:bg-gray-50 rounded disabled:opacity-50"
-              title="Cancel"
+              title="Cancel (Esc)"
             >
               <X className="w-4 h-4" />
             </button>

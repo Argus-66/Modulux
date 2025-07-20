@@ -28,6 +28,5 @@ export default function BuilderPage() {
 
   if (!session) return null
 
-  // Use params.id directly from useParams hook
   return <PortfolioBuilder portfolioId={params.id} />
 }

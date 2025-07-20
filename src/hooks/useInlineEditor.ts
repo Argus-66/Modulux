@@ -17,7 +17,7 @@ export function useInlineEditor(
   const [isSaving, setIsSaving] = useState(false)
   const [lastSaved, setLastSaved] = useState<Date | null>(null)
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null)
-  const saveTimeoutRef = useRef<NodeJS.Timeout>()
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null) // Fix: Add initial value
 
   const {
     maxLength = 500,

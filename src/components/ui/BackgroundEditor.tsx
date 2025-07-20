@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Palette, Gradient } from 'lucide-react'
+import { Palette, Paintbrush2 } from 'lucide-react'
 
 interface BackgroundEditorProps {
   background: SectionBackground
@@ -46,7 +46,7 @@ export default function BackgroundEditor({ background, onBackgroundChange }: Bac
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center space-x-2 px-3 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
       >
-        {background.type === 'gradient' ? <Gradient className="w-4 h-4" /> : <Palette className="w-4 h-4" />}
+        {background.type === 'gradient' ? <Paintbrush2 className="w-4 h-4" /> : <Palette className="w-4 h-4" />}
         <span className="text-sm">Background</span>
       </button>
 

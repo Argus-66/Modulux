@@ -8,40 +8,35 @@ interface SmartNavigationProps {
 }
 
 export default function SmartNavigation({ sections }: SmartNavigationProps) {
-  // Auto-generate navigation items based on sections
+  // Auto-generate navigation items based on sections - NO IMAGES
   const getNavigationItems = () => {
-    const navItems: Array<{ name: string; href: string; icon: string }> = []
+    const navItems: Array<{ name: string; href: string }> = []
     
     sections.forEach(section => {
       switch (section.type) {
         case 'hero':
-          navItems.push({ name: 'Home', href: '#home', icon: '🏠' })
+          navItems.push({ name: 'Home', href: '#home' })
           break
         case 'about':
-          navItems.push({ name: 'About', href: '#about', icon: '👋' })
+          navItems.push({ name: 'About', href: '#about' })
           break
         case 'projects':
-          navItems.push({ name: 'Projects', href: '#projects', icon: '💼' })
+          navItems.push({ name: 'Projects', href: '#projects' })
           break
         case 'skills':
-          navItems.push({ name: 'Skills', href: '#skills', icon: '⚡' })
+          navItems.push({ name: 'Skills', href: '#skills' })
           break
         case 'experience':
-          navItems.push({ name: 'Experience', href: '#experience', icon: '🏢' })
+          navItems.push({ name: 'Experience', href: '#experience' })
           break
         case 'education':
-          navItems.push({ name: 'Education', href: '#education', icon: '🎓' })
+          navItems.push({ name: 'Education', href: '#education' })
           break
         case 'contact':
-          navItems.push({ name: 'Contact', href: '#contact', icon: '📬' })
+          navItems.push({ name: 'Contact', href: '#contact' })
           break
       }
     })
-
-    // Always include Home if hero section exists, otherwise add a default
-    if (!navItems.some(item => item.name === 'Home') && sections.some(s => s.type === 'hero')) {
-      navItems.unshift({ name: 'Home', href: '#home', icon: '🏠' })
-    }
 
     return navItems
   }
@@ -51,21 +46,15 @@ export default function SmartNavigation({ sections }: SmartNavigationProps) {
   return (
     <div className="bg-white border-2 border-blue-200 rounded-lg shadow-sm overflow-hidden">
       <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6">
-        <h3 className="text-lg font-semibold mb-4">🧭 Smart Navigation</h3>
-        <div className="text-sm text-blue-100 mb-4">
-          Auto-updates based on your sections
-        </div>
-        
-        <nav className="flex flex-wrap gap-4">
+        <nav className="flex flex-wrap gap-6 justify-center">
           {navigationItems.length > 0 ? (
             navigationItems.map((item, index) => (
               <a
                 key={index}
                 href={item.href}
-                className="flex items-center space-x-2 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors text-white font-medium"
+                className="text-white hover:text-blue-200 font-medium text-lg transition-colors border-b-2 border-transparent hover:border-blue-200 pb-1"
               >
-                <span className="text-lg">{item.icon}</span>
-                <span>{item.name}</span>
+                {item.name}
               </a>
             ))
           ) : (
@@ -76,8 +65,8 @@ export default function SmartNavigation({ sections }: SmartNavigationProps) {
         </nav>
         
         {navigationItems.length > 0 && (
-          <div className="mt-4 text-xs text-blue-200">
-            ✨ Navigation items added: {navigationItems.map(item => item.name).join(', ')}
+          <div className="mt-4 text-center text-sm text-blue-200">
+            ✨ Auto-generated from your sections: {navigationItems.map(item => item.name).join(' • ')}
           </div>
         )}
       </div>

@@ -1,5 +1,5 @@
 export interface Portfolio {
-  _id?: string  // Always string in frontend
+  _id?: string
   userId: string
   name: string
   slug: string
@@ -16,10 +16,11 @@ export interface Portfolio {
 
 export interface PortfolioSection {
   id: string
-  type: 'hero' | 'about' | 'projects' | 'skills' | 'contact' | 'experience' | 'education'
-  data: SectionData
+  type: 'hero' | 'about' | 'projects' | 'skills' | 'contact' | 'experience' | 'education' | 'navigation' | 'testimonials' | 'gallery' // Added missing types
+  data: any
   order: number
   isVisible: boolean
+  position?: { x: number; y: number }
 }
 
 // Fix: Define specific data types for better type safety

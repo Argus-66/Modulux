@@ -3,21 +3,28 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Button from '@/components/ui/Button'
+import ThemeEditor from './ThemeEditor'
 import { Portfolio } from '@/types/portfolio'
-import { ArrowLeft, Save, Eye, Edit3, Globe, Loader2 } from 'lucide-react'
+import { ArrowLeft, Save, Eye, Edit3, Globe, Loader2, Layers, MousePointer, Grid3X3 } from 'lucide-react'
 
 interface BuilderHeaderProps {
   portfolio: Portfolio
   isPreviewMode: boolean
   setIsPreviewMode: (mode: boolean) => void
   isSaving: boolean
+  viewMode: 'sections' | 'freeform'
+  setViewMode: (mode: 'sections' | 'freeform') => void
+  onThemeChange: (theme: any) => void
 }
 
 export default function BuilderHeader({ 
   portfolio,
   isPreviewMode, 
   setIsPreviewMode,
-  isSaving
+  isSaving,
+  viewMode,
+  setViewMode,
+  onThemeChange
 }: BuilderHeaderProps) {
   const [isPublishing, setIsPublishing] = useState(false)
   const router = useRouter()
@@ -28,9 +35,7 @@ export default function BuilderHeader({
       const response = await fetch(`/api/portfolios/${portfolio._id}/publish`, {
         method: 'POST',
       })
-
       if (response.ok) {
-        // TODO: Show success notification
         console.log('Portfolio published successfully!')
       }
     } catch (error) {
@@ -73,6 +78,32 @@ export default function BuilderHeader({
           </div>
         )}
 
+        {/* View Mode Toggle */}
+        <div className="flex items-center bg-gray-100 rounded-lg p-1">
+          <button
+            onClick={() => setViewMode('sections')}
+            className={`flex items-center px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+              viewMode === 'sections' 
+                ? 'bg-white text-gray-900 shadow-sm' 
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            <Layers className="w-4 h-4 mr-1" />
+            Sections
+          </button>
+          <button
+            onClick={() => setViewMode('freeform')}
+            className={`flex items-center px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+              viewMode === 'freeform' 
+                ? 'bg-white text-gray-900 shadow-sm' 
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            <MousePointer className="w-4 h-4 mr-1" />
+            Freeform
+          </button>
+        </div>
+
         {/* Mode Toggle */}
         <div className="flex items-center bg-gray-100 rounded-lg p-1">
           <button
@@ -98,6 +129,12 @@ export default function BuilderHeader({
             Preview
           </button>
         </div>
+
+        {/* Theme Editor */}
+        <ThemeEditor 
+          theme={portfolio.theme}
+          onThemeChange={onThemeChange}
+        />
 
         {/* Action Buttons */}
         <div className="flex items-center space-x-2">

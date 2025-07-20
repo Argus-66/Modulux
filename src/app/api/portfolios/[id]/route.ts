@@ -44,11 +44,22 @@ export async function PUT(
     const session = await getServerSession(authOptions)
     
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json(
+        { error: 'Authentication required', code: 'UNAUTHORIZED' }, 
+        { status: 401 }
+      )
     }
 
     const updates = await request.json()
     
+    // Validate updates object
+    if (!updates || typeof updates !== 'object') {
+      return NextResponse.json(
+        { error: 'Invalid request body', code: 'INVALID_DATA' },
+        { status: 400 }
+      )
+    }
+
     const portfolio = await PortfolioService.updatePortfolio(
       params.id,
       session.user.id,
@@ -57,19 +68,24 @@ export async function PUT(
 
     if (!portfolio) {
       return NextResponse.json(
-        { error: 'Portfolio not found' },
+        { error: 'Portfolio not found', code: 'NOT_FOUND' },
         { status: 404 }
       )
     }
 
     return NextResponse.json({
       success: true,
-      portfolio
+      portfolio,
+      message: 'Portfolio updated successfully'
     })
   } catch (error) {
-    console.error('Error updating portfolio:', error)
+    console.error('API Error updating portfolio:', error)
+    
     return NextResponse.json(
-      { error: 'Failed to update portfolio' },
+      { 
+        error: error instanceof Error ? error.message : 'Internal server error',
+        code: 'INTERNAL_ERROR' 
+      },
       { status: 500 }
     )
   }

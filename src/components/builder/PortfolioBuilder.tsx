@@ -88,41 +88,46 @@ export default function PortfolioBuilder({ portfolioId }: PortfolioBuilderProps)
     }
 
     const getDefaultSectionData = (type: string) => {
-        switch (type) {
-            case 'hero':
-                return {
-                    title: 'Your Name',
-                    subtitle: 'Your Professional Title',
-                    description: 'Brief description about yourself and what you do.',
-                    image: null
-                }
-            case 'about':
-                return {
-                    title: 'About Me',
-                    content: 'Tell your story and what makes you unique.',
-                    image: null
-                }
-            case 'projects':
-                return {
-                    title: 'My Projects',
-                    projects: []
-                }
-            case 'skills':
-                return {
-                    title: 'Skills & Expertise',
-                    skills: []
-                }
-            case 'contact':
-                return {
-                    title: 'Get In Touch',
-                    email: '',
-                    phone: '',
-                    social: {}
-                }
-            default:
-                return {}
+        const defaultData = {
+            hero: {
+                title: '',
+                subtitle: '',
+                description: '',
+                image: null
+            },
+            about: {
+                title: 'About Me',
+                content: '',
+                image: null
+            },
+            projects: {
+                title: 'My Projects',
+                projects: []
+            },
+            skills: {
+                title: 'Skills & Expertise',
+                skills: []
+            },
+            contact: {
+                title: 'Get In Touch',
+                email: '',
+                phone: '',
+                social: {}
+            },
+            navigation: {
+                title: 'Navigation',
+                items: [
+                    { name: 'Home', href: '#home' },
+                    { name: 'About', href: '#about' },
+                    { name: 'Projects', href: '#projects' },
+                    { name: 'Contact', href: '#contact' }
+                ]
+            }
         }
+
+        return defaultData[type] || {}
     }
+
 
     const updateSection = async (sectionId: string, data: any) => {
         const newSections = sections.map(section =>
@@ -130,6 +135,22 @@ export default function PortfolioBuilder({ portfolioId }: PortfolioBuilderProps)
                 ? { ...section, data: { ...section.data, ...data } }
                 : section
         )
+        setSections(newSections)
+        await savePortfolio(newSections)
+    }
+
+    const duplicateSection = async (sectionId: string) => {
+        const sectionToDuplicate = sections.find(s => s.id === sectionId)
+        if (!sectionToDuplicate) return
+
+        const newSection: PortfolioSection = {
+            ...sectionToDuplicate,
+            id: `section-${Date.now()}`,
+            order: sections.length,
+            data: { ...sectionToDuplicate.data } // Deep copy the data
+        }
+
+        const newSections = [...sections, newSection]
         setSections(newSections)
         await savePortfolio(newSections)
     }
@@ -208,6 +229,8 @@ export default function PortfolioBuilder({ portfolioId }: PortfolioBuilderProps)
                             setSelectedSectionId={setSelectedSectionId}
                             isPreviewMode={isPreviewMode}
                             onUpdateSection={updateSection}
+                            onDeleteSection={deleteSection} // This should already exist
+                            onDuplicateSection={duplicateSection} // Add this new function
                         />
                     </SortableContext>
 

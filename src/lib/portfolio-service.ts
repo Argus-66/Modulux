@@ -98,15 +98,16 @@ export class PortfolioService {
     return portfolio ? this.documentToPortfolio(portfolio) : null
   }
 
-  static async updatePortfolio(
-    portfolioId: string, 
-    userId: string, 
-    updates: Partial<Portfolio>
-  ): Promise<Portfolio | null> {
+static async updatePortfolio(
+  portfolioId: string, 
+  userId: string, 
+  updates: Partial<Portfolio>
+): Promise<Portfolio | null> {
+  try {
     const collection = await this.getCollection()
     
     if (!ObjectId.isValid(portfolioId)) {
-      return null
+      throw new Error('Invalid portfolio ID format')
     }
     
     // Remove _id and convert dates properly
@@ -122,8 +123,27 @@ export class PortfolioService {
       { returnDocument: 'after' }
     )
 
-    return result ? this.documentToPortfolio(result) : null
+    if (!result) {
+      throw new Error('Portfolio not found or access denied')
+    }
+
+    return this.documentToPortfolio(result)
+  } catch (error: any) {
+    console.error('Error updating portfolio:', error)
+    
+    // Handle specific MongoDB errors
+    if (error.code === 11000) {
+      throw new Error('Duplicate key error: Portfolio with this data already exists')
+    }
+    
+    if (error.name === 'ValidationError') {
+      throw new Error('Invalid portfolio data provided')
+    }
+    
+    // Re-throw the error for the caller to handle
+    throw error
   }
+}
 
   static async deletePortfolio(portfolioId: string, userId: string): Promise<boolean> {
     const collection = await this.getCollection()

@@ -1,13 +1,14 @@
 'use client'
 
 import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useParams } from 'next/navigation'
 import { useEffect } from 'react'
 import PortfolioBuilder from '@/components/builder/PortfolioBuilder'
 
-export default function BuilderPage({ params }: { params: { id: string } }) {
+export default function BuilderPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const params = useParams<{ id: string }>()
 
   useEffect(() => {
     if (status === 'loading') return
@@ -27,5 +28,6 @@ export default function BuilderPage({ params }: { params: { id: string } }) {
 
   if (!session) return null
 
+  // Use params.id directly from useParams hook
   return <PortfolioBuilder portfolioId={params.id} />
 }
